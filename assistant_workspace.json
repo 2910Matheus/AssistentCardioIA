@@ -1,0 +1,125 @@
+{
+  "name": "Assistente Cardiológico CardioIA",
+  "intents": [
+    {
+      "intent": "saudacao",
+      "examples": [
+        { "text": "Olá" },
+        { "text": "Oi" },
+        { "text": "Bom dia" },
+        { "text": "Boa tarde" },
+        { "text": "Tem alguém aí?" }
+      ]
+    },
+    {
+      "intent": "sintomas_dor_peito",
+      "examples": [
+        { "text": "Estou com dor no peito" },
+        { "text": "Sinto um aperto no coração" },
+        { "text": "Meu peito está doendo" },
+        { "text": "Sinto uma pressão no tórax" }
+      ]
+    },
+    {
+      "intent": "agendar_consulta",
+      "examples": [
+        { "text": "Quero marcar uma consulta" },
+        { "text": "Como faço para ver um cardiologista?" },
+        { "text": "Preciso de um médico" },
+        { "text": "Agendar retorno" }
+      ]
+    },
+    {
+      "intent": "despedida",
+      "examples": [
+        { "text": "Tchau" },
+        { "text": "Até logo" },
+        { "text": "Obrigado" },
+        { "text": "Encerrar" }
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "entity": "sintoma",
+      "values": [
+        { "value": "dor_peito", "synonyms": ["aperto", "pressão", "pontada"] },
+        { "value": "palpitacao", "synonyms": ["taquicardia", "batedeira", "coração acelerado"] }
+      ]
+    }
+  ],
+  "dialog_nodes": [
+    {
+      "type": "standard",
+      "title": "Bem-vindo",
+      "output": {
+        "generic": [
+          {
+            "values": [{ "text": "Olá! Eu sou o assistente do CardioIA. Como posso ajudar com sua saúde cardíaca hoje?" }],
+            "response_type": "text"
+          }
+        ]
+      },
+      "conditions": "welcome",
+      "dialog_node": "node_1_welcome"
+    },
+    {
+      "type": "standard",
+      "title": "Tratar Saudação",
+      "output": {
+        "generic": [
+          {
+            "values": [{ "text": "Olá! Sou seu assistente virtual de cardiologia. Em que posso ser útil?" }],
+            "response_type": "text"
+          }
+        ]
+      },
+      "conditions": "#saudacao",
+      "dialog_node": "node_2_saudacao"
+    },
+    {
+      "type": "standard",
+      "title": "Tratar Dor no Peito",
+      "output": {
+        "generic": [
+          {
+            "values": [{ "text": "Entendo. Dor no peito pode ser algo sério. Há quanto tempo você sente isso e a dor irradia para o braço ou mandíbula?" }],
+            "response_type": "text"
+          }
+        ]
+      },
+      "conditions": "#sintomas_dor_peito",
+      "dialog_node": "node_3_dor_peito"
+    },
+    {
+      "type": "standard",
+      "title": "Agendar Consulta",
+      "output": {
+        "generic": [
+          {
+            "values": [{ "text": "Posso ajudar com isso. Qual seria o melhor período para você: manhã ou tarde?" }],
+            "response_type": "text"
+          }
+        ]
+      },
+      "conditions": "#agendar_consulta",
+      "dialog_node": "node_4_agendamento"
+    },
+    {
+      "type": "standard",
+      "title": "Em outros casos",
+      "output": {
+        "generic": [
+          {
+            "values": [{ "text": "Desculpe, não entendi. Você pode reformular sua pergunta? Posso ajudar com sintomas ou agendamentos." }],
+            "response_type": "text"
+          }
+        ]
+      },
+      "conditions": "anything_else",
+      "dialog_node": "node_5_fallback"
+    }
+  ],
+  "language": "pt-br",
+  "description": "Workspace para o projeto CardioIA - Fase 5"
+}
