@@ -6,33 +6,28 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 app = Flask(__name__)
 
 # Configurações do Watson Assistant (a serem preenchidas pelo usuário)
-API_KEY = os.environ.get('WATSON_API_KEY', 'YOUR_API_KEY_HERE')
-SERVICE_URL = os.environ.get('WATSON_SERVICE_URL', 'YOUR_SERVICE_URL_HERE')
-ASSISTANT_ID = os.environ.get('WATSON_ASSISTANT_ID', 'YOUR_ASSISTANT_ID_HERE')
+API_KEY = os.environ.get('WATSON_API_KEY', '')
+SERVICE_URL = os.environ.get('WATSON_SERVICE_URL', '')
+ENVIRONMENT_ID = os.environ.get('WATSON_ENVIRONMENT_ID', '')
+ASSISTANT_ID = os.environ.get("WATSON_ASSISTANT_ID", "")
 
-# Inicialização do Watson Assistant
+session_id_global = None
+
 try:
     authenticator = IAMAuthenticator(API_KEY)
-    assistant = AssistantV2(
-        version='2021-06-14',
-        authenticator=authenticator
-    )
+    assistant = AssistantV2(version='2021-06-14', authenticator=authenticator)
     assistant.set_service_url(SERVICE_URL)
-    session_id = None
 except Exception as e:
-    print(f"Erro ao configurar Watson: {e}")
-    assistant = None
+    print(f"Erro: {e}")
 
-def get_session_id():
-    global session_id
-    if assistant:
+def get_session():
+    global session_id_global
+    if session_id_global is None:
         try:
-            response = assistant.create_session(assistant_id=ASSISTANT_ID).get_result()
-            return response['session_id']
-        except Exception as e:
-            print(f"Erro ao criar sessão: {e}")
-            return None
-    return None
+            res = assistant.create_session(assistant_id=ENVIRONMENT_ID, environment_id=ENVIRONMENT_ID).get_result()
+            session_id_global = res['session_id']
+        except: return None
+    return session_id_global
 
 @app.route('/')
 def index():
@@ -40,38 +35,43 @@ def index():
 
 @app.route('/message', methods=['POST'])
 def message():
+    global session_id_global
     user_input = request.json.get('message', '')
+    sid = get_session()
     
-    # Se o Watson não estiver configurado, simulamos uma resposta (Mock)
-    if not assistant or API_KEY == 'YOUR_API_KEY_HERE':
-        return jsonify({
-            'response': f"Simulação: Você disse '{user_input}'. (Configure as chaves do Watson para integração real.)",
-            'source': 'Mock/Simulação'
-        })
-
     try:
-        global session_id
-        if not session_id:
-            session_id = get_session_id()
-
         response = assistant.message(
-            assistant_id=ASSISTANT_ID,
-            session_id=session_id,
-            input={'text': user_input}
+            assistant_id=ENVIRONMENT_ID,
+            environment_id=ENVIRONMENT_ID,
+            session_id=sid,
+            user_id='matheus_fiap',
+            input={
+                'message_type': 'text',
+                'text': user_input,
+                'options': {'return_context': True} # CRUCIAL: Mantém a variável $frequencia
+            }
         ).get_result()
 
-        # Extraindo o texto da resposta
-        generic = response['output'].get('generic', [])
+        output = response.get('output', {})
+        generic = output.get('generic', [])
+        
+        respostas = []
         if generic:
-            reply = generic[0].get('text', 'Não entendi.')
-        else:
-            reply = "Desculpe, não consegui processar sua mensagem."
+            for item in generic:
+                if item.get('response_type') == 'text':
+                    respostas.append(item.get('text'))
+                elif item.get('response_type') == 'option':
+                    if item.get('title'): respostas.append(item.get('title'))
+                    for opt in item.get('options', []):
+                        respostas.append(f"• {opt['label']}")
+            
+            return jsonify({'response': "\n".join(respostas), 'source': 'Watson'})
+        
+        return jsonify({'response': "O Watson não retornou resposta.", 'source': 'Watson'})
 
-        return jsonify({'response': reply, 'source': 'Watson Assistant'})
     except Exception as e:
-        # Tenta resetar sessão em caso de erro (ex: sessão expirada)
-        session_id = None
-        return jsonify({'response': f"Ocorreu um erro na comunicação: {str(e)}", 'source': 'Error'})
+        session_id_global = None
+        return jsonify({'response': "Sessão expirada. Tente novamente.", 'source': 'Retry'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
