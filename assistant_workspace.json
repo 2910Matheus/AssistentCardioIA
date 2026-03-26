@@ -1,125 +1,483 @@
 {
-  "name": "Assistente Cardiológico CardioIA",
+  "name": "CardioIA - Triagem Profissional Completa",
+  "description": "Assistente virtual de orientação em saúde cardiovascular (BPM, Pressão e Dor no Peito).",
+  "language": "pt-br",
   "intents": [
     {
       "intent": "saudacao",
       "examples": [
-        { "text": "Olá" },
+        { "text": "boa noite" },
+        { "text": "boa tarde" },
+        { "text": "bom dia" },
         { "text": "Oi" },
-        { "text": "Bom dia" },
-        { "text": "Boa tarde" },
-        { "text": "Tem alguém aí?" }
+        { "text": "olá" }
       ]
     },
     {
-      "intent": "sintomas_dor_peito",
+      "intent": "verificar_bpm",
       "examples": [
-        { "text": "Estou com dor no peito" },
-        { "text": "Sinto um aperto no coração" },
-        { "text": "Meu peito está doendo" },
-        { "text": "Sinto uma pressão no tórax" }
+        { "text": "batimentos cardíacos" },
+        { "text": "frequência cardíaca" },
+        { "text": "medir bpm" }
       ]
     },
     {
-      "intent": "agendar_consulta",
+      "intent": "verificar_pressao",
       "examples": [
-        { "text": "Quero marcar uma consulta" },
-        { "text": "Como faço para ver um cardiologista?" },
-        { "text": "Preciso de um médico" },
-        { "text": "Agendar retorno" }
+        { "text": "pressão arterial" },
+        { "text": "medir pressão" },
+        { "text": "minha pressão está alta" },
+        { "text": "ver pressão" }
       ]
     },
     {
-      "intent": "despedida",
+      "intent": "dor_no_peito",
       "examples": [
-        { "text": "Tchau" },
-        { "text": "Até logo" },
-        { "text": "Obrigado" },
-        { "text": "Encerrar" }
+        { "text": "dor no peito" },
+        { "text": "aperto no peito" },
+        { "text": "meu peito está doendo" },
+        { "text": "pontada no coração" }
+      ]
+    },
+    {
+      "intent": "dicas_saude",
+      "examples": [
+        { "text": "dicas de saúde" },
+        { "text": "como cuidar do coração" },
+        { "text": "prevenção" },
+        { "text": "o que comer para pressão" }
+      ]
+    },
+    {
+      "intent": "afirmacao",
+      "examples": [
+        { "text": "sim" },
+        { "text": "faço sim" },
+        { "text": "tenho" },
+        { "text": "isso mesmo" }
+      ]
+    },
+    {
+      "intent": "negacao",
+      "examples": [
+        { "text": "Não" },
+        { "text": "nunca" },
+        { "text": "não sinto" },
+        { "text": "não faço" }
+      ]
+    },
+    {
+      "intent": "sintomas_graves",
+      "examples": [
+        { "text": "Estou com falta de ar" },
+        { "text": "dor irradiando" },
+        { "text": "tontura" },
+        { "text": "suor frio" }
+      ]
+    },
+    {
+      "intent": "agradecimento",
+      "examples": [
+        { "text": "obrigado" },
+        { "text": "obrigado pela ajuda" },
+        { "text": "valeu" }
       ]
     }
   ],
   "entities": [
     {
-      "entity": "sintoma",
-      "values": [
-        { "value": "dor_peito", "synonyms": ["aperto", "pressão", "pontada"] },
-        { "value": "palpitacao", "synonyms": ["taquicardia", "batedeira", "coração acelerado"] }
-      ]
+      "entity": "sys-number",
+      "values": []
     }
   ],
   "dialog_nodes": [
     {
       "type": "standard",
-      "title": "Bem-vindo",
+      "title": "1. Saudação",
+      "dialog_node": "node_saudacao",
+      "conditions": "welcome || #saudacao",
       "output": {
         "generic": [
           {
-            "values": [{ "text": "Olá! Eu sou o assistente do CardioIA. Como posso ajudar com sua saúde cardíaca hoje?" }],
+            "values": [
+              {
+                "text": "Olá! Eu sou o CardioIA 🫀\nSou o seu assistente virtual de orientação em saúde cardiovascular.\nPosso te ajudar com:\n1️⃣ Frequência Cardíaca\n2️⃣ Pressão Arterial\n3️⃣ Dor no peito\n4️⃣ Dicas de saúde\n\nSobre qual desses temas você quer falar?"
+              }
+            ],
             "response_type": "text"
           }
         ]
-      },
-      "conditions": "welcome",
-      "dialog_node": "node_1_welcome"
+      }
     },
     {
       "type": "standard",
-      "title": "Tratar Saudação",
+      "title": "Fluxo: Dor no Peito (EMERGÊNCIA)",
+      "dialog_node": "node_dor_peito",
+      "conditions": "#dor_no_peito",
+      "previous_sibling": "node_saudacao",
       "output": {
         "generic": [
           {
-            "values": [{ "text": "Olá! Sou seu assistente virtual de cardiologia. Em que posso ser útil?" }],
+            "values": [
+              {
+                "text": "⚠️ **Atenção:** Dor no peito é um sintoma que exige cuidado. Essa dor está irradiando para o braço esquerdo, costas ou mandíbula, ou vem acompanhada de falta de ar/suor frio?"
+              }
+            ],
             "response_type": "text"
           }
         ]
       },
-      "conditions": "#saudacao",
-      "dialog_node": "node_2_saudacao"
+      "next_step": {
+        "behavior": "wait_for_user_input"
+      }
     },
     {
       "type": "standard",
-      "title": "Tratar Dor no Peito",
+      "title": "Dor no Peito: Sim (Grave)",
+      "dialog_node": "node_dor_peito_grave",
+      "parent": "node_dor_peito",
+      "conditions": "#afirmacao || #sintomas_graves",
       "output": {
         "generic": [
           {
-            "values": [{ "text": "Entendo. Dor no peito pode ser algo sério. Há quanto tempo você sente isso e a dor irradia para o braço ou mandíbula?" }],
+            "values": [
+              {
+                "text": "🚨 **EMERGÊNCIA MÉDICA:** Estes são sinais de alerta para um possível infarto. Por favor, **LIGUE IMEDIATAMENTE PARA O SAMU (192)** ou vá para o pronto-socorro mais próximo. Não dirija sozinho!"
+              }
+            ],
             "response_type": "text"
           }
         ]
-      },
-      "conditions": "#sintomas_dor_peito",
-      "dialog_node": "node_3_dor_peito"
+      }
     },
     {
       "type": "standard",
-      "title": "Agendar Consulta",
+      "title": "Dor no Peito: Não (Leve)",
+      "dialog_node": "node_dor_peito_leve",
+      "parent": "node_dor_peito",
+      "previous_sibling": "node_dor_peito_grave",
+      "conditions": "#negacao",
       "output": {
         "generic": [
           {
-            "values": [{ "text": "Posso ajudar com isso. Qual seria o melhor período para você: manhã ou tarde?" }],
+            "values": [
+              {
+                "text": "Menos mal. Pode ser uma dor muscular, gases ou ansiedade. Tente sentar-se confortavelmente, respire fundo e beba água. Se a dor persistir por mais de 20 minutos ou piorar, procure um médico."
+              }
+            ],
             "response_type": "text"
           }
         ]
-      },
-      "conditions": "#agendar_consulta",
-      "dialog_node": "node_4_agendamento"
+      }
     },
     {
       "type": "standard",
-      "title": "Em outros casos",
+      "title": "Fluxo: Pressão Arterial",
+      "dialog_node": "node_inicia_pressao",
+      "conditions": "#verificar_pressao",
+      "previous_sibling": "node_dor_peito",
       "output": {
         "generic": [
           {
-            "values": [{ "text": "Desculpe, não entendi. Você pode reformular sua pergunta? Posso ajudar com sintomas ou agendamentos." }],
+            "values": [
+              {
+                "text": "Vamos analisar sua pressão. Por favor, informe apenas o valor da sua **pressão sistólica (a máxima)**. Exemplo: se deu 12 por 8, digite apenas **12**."
+              }
+            ],
             "response_type": "text"
           }
         ]
       },
+      "next_step": {
+        "behavior": "wait_for_user_input"
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Processa Pressão",
+      "dialog_node": "node_processa_pressao",
+      "parent": "node_inicia_pressao",
+      "conditions": "@sys-number",
+      "context": {
+        "pressao_maxima": "<? @sys-number ?>"
+      },
+      "next_step": {
+        "behavior": "skip_user_input"
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Pressão: Alta",
+      "dialog_node": "node_pressao_alta",
+      "parent": "node_processa_pressao",
+      "conditions": "$pressao_maxima >= 14",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Sua pressão máxima está em **<? $pressao_maxima ?>0 mmHg**, o que é considerado **ALTA** (Hipertensão). Evite sal, repouse e, se sentir tontura ou dor de cabeça forte, procure um médico."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Pressão: Normal",
+      "dialog_node": "node_pressao_normal",
+      "parent": "node_processa_pressao",
+      "previous_sibling": "node_pressao_alta",
+      "conditions": "$pressao_maxima >= 9 && $pressao_maxima < 14",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Ótimo! Sua pressão máxima (<? $pressao_maxima ?>) está dentro dos padrões **NORMAIS**."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Pressão: Baixa",
+      "dialog_node": "node_pressao_baixa",
+      "parent": "node_processa_pressao",
+      "previous_sibling": "node_pressao_normal",
+      "conditions": "$pressao_maxima < 9",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Sua pressão máxima (<? $pressao_maxima ?>) está **BAIXA** (Hipotensão). É recomendado ingerir líquidos, deitar-se com as pernas elevadas e evitar movimentos bruscos."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Fluxo: Frequência Cardíaca",
+      "dialog_node": "node_inicia_triagem_bpm",
+      "conditions": "#verificar_bpm",
+      "previous_sibling": "node_inicia_pressao",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Para analisar a sua frequência cardíaca, preciso saber: você tem o costume de fazer exercícios físicos ou praticou alguma atividade nos últimos 15 minutos?"
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      },
+      "next_step": {
+        "behavior": "wait_for_user_input"
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Pede o BPM",
+      "dialog_node": "node_pede_bpm",
+      "parent": "node_inicia_triagem_bpm",
+      "conditions": "true",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Certo, anotado. Agora, por favor, me informe apenas o número da sua frequência cardíaca (BPM)."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      },
+      "next_step": {
+        "behavior": "wait_for_user_input"
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Processa o BPM",
+      "dialog_node": "node_processa_bpm",
+      "parent": "node_pede_bpm",
+      "conditions": "@sys-number",
+      "context": {
+        "frequencia": "<? @sys-number ?>"
+      },
+      "next_step": {
+        "behavior": "skip_user_input"
+      }
+    },
+    {
+      "type": "standard",
+      "title": "BPM: Baixo",
+      "dialog_node": "node_resultado_baixo",
+      "parent": "node_processa_bpm",
+      "conditions": "$frequencia < 60",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Sua frequência está **BAIXA** (<? $frequencia ?> bpm). Se você não for um atleta e estiver sentindo tonturas, procure avaliação médica."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "BPM: Normal",
+      "dialog_node": "node_resultado_normal",
+      "parent": "node_processa_bpm",
+      "previous_sibling": "node_resultado_baixo",
+      "conditions": "$frequencia >= 60 && $frequencia <= 100",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Ótima notícia! Sua frequência está **NORMAL** (<? $frequencia ?> bpm)."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "BPM: Alto",
+      "dialog_node": "node_resultado_alto",
+      "parent": "node_processa_bpm",
+      "previous_sibling": "node_resultado_normal",
+      "conditions": "$frequencia > 100",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Sua frequência está **ALTA** (<? $frequencia ?> bpm). Você está sentindo falta de ar ou dor no peito neste momento?"
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      },
+      "next_step": {
+        "behavior": "wait_for_user_input"
+      }
+    },
+    {
+      "type": "standard",
+      "title": "BPM: Emergência",
+      "dialog_node": "node_alerta_emergencia",
+      "parent": "node_resultado_alto",
+      "conditions": "#sintomas_graves || #afirmacao",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "🚨 **ATENÇÃO:** Como você relatou sintomas graves associados à frequência alta, recomendo procurar uma unidade de pronto atendimento imediatamente ou ligar para o SAMU (192)."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "BPM: Sem Emergência",
+      "dialog_node": "node_sem_emergencia",
+      "parent": "node_resultado_alto",
+      "previous_sibling": "node_alerta_emergencia",
+      "conditions": "#negacao",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Menos mal. Tente repousar por 10 minutos, beba água e faça uma nova medição. Se continuar alto, procure um médico."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Dicas de Saúde",
+      "dialog_node": "node_dicas_saude",
+      "conditions": "#dicas_saude",
+      "previous_sibling": "node_inicia_triagem_bpm",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "🥦 **Dicas do CardioIA:**\n1. Caminhe pelo menos 30 minutos por dia.\n2. Reduza o sal na comida (ele é o grande vilão da pressão alta).\n3. Beba bastante água e gerencie o estresse.\nO seu coração agradece!"
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Encerramento",
+      "dialog_node": "node_agradecimento",
+      "conditions": "#agradecimento",
+      "previous_sibling": "node_dicas_saude",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Disponha! O CardioIA está sempre aqui para ajudar. Cuide bem do seu coração! ❤️"
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "type": "standard",
+      "title": "Em Outros Casos (Fallback)",
+      "dialog_node": "node_anything_else",
       "conditions": "anything_else",
-      "dialog_node": "node_5_fallback"
+      "previous_sibling": "node_agradecimento",
+      "output": {
+        "generic": [
+          {
+            "values": [
+              {
+                "text": "Desculpe, não entendi. Lembre-se que sou um assistente focado em saúde cardiovascular. Posso te ajudar com **frequência cardíaca**, **pressão arterial** ou avaliar **dor no peito**."
+              }
+            ],
+            "response_type": "text"
+          }
+        ]
+      }
     }
-  ],
-  "language": "pt-br",
-  "description": "Workspace para o projeto CardioIA - Fase 5"
+  ]
 }
