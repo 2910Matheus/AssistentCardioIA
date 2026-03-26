@@ -43,5 +43,7 @@ O projeto está organizado da seguinte forma:
 - Matheus Augusto Rodrigues Maia - RM560683
 - Matheus Conciani - RM559473
 
+## Apresentção do projeto
+[CardioIA Aprensentação](https://www.youtube.com/watch?v=tZzjODVdYG4)
 ---
 *Este projeto foi desenvolvido para fins acadêmicos, simulando um atendimento inicial em saúde.*
