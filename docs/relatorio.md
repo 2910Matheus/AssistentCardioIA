@@ -38,6 +38,3 @@ Uma interface web responsiva foi criada para permitir a interação em tempo rea
 O protótipo demonstra a viabilidade de assistentes virtuais na triagem inicial de pacientes cardiológicos. A integração de técnicas de NLP permite uma comunicação mais humana e eficiente, respeitando as boas práticas de saúde digital discutidas ao longo da fase.
 
 ---
-**Equipe:** [Nomes dos Integrantes]
-**Curso:** [Nome do Curso]
-**Instituição:** [Nome da Instituição]
