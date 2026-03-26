@@ -40,11 +40,8 @@ O projeto está organizado da seguinte forma:
     - Acesse `http://localhost:5000` no seu navegador.
 
 ## 👥 Equipe
-- [Integrante 1]
-- [Integrante 2]
-- [Integrante 3]
-- [Integrante 4]
-- [Integrante 5]
+- Matheus Augusto Rodrigues Maia - RM560683
+- Matheus Conciani - RM559473
 
 ---
 *Este projeto foi desenvolvido para fins acadêmicos, simulando um atendimento inicial em saúde.*
